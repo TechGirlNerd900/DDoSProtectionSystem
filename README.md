@@ -74,7 +74,7 @@ yum install python3 python3-pip tcpdump iptables msmtp mailx
 1. Clone the repository:
    ```bash
    git clone https://github.com/TechGirlNerd900/DDoSProtectionSystem.git
-   cd ddos-protection
+   cd DDoSProtectionSystem
    ```
 
 2. Install dependencies:
