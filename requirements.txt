@@ -11,3 +11,4 @@ scapy>=2.5.0  # For packet analysis
 typing-extensions>=4.5.0
 prometheus_client>=0.17.0
 PyYAML>=6.0.1  # For configuration file handling
+flask>=2.0.0  # For web dashboard

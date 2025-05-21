@@ -1,6 +1,6 @@
 # Enhanced DDoS Protection System v2.0.0
 
-A comprehensive DDoS protection system that combines adaptive threshold detection, connection tracking, resource monitoring, and advanced alerting features. This system is designed for production use and offers robust protection against various types of DDoS attacks.
+A comprehensive DDoS protection system that combines adaptive threshold detection, connection tracking, resource monitoring, advanced alerting features, and a web dashboard. This system is designed for production use and offers robust protection against various types of DDoS attacks.
 
 ## Key Features
 
@@ -49,6 +49,16 @@ A comprehensive DDoS protection system that combines adaptive threshold detectio
   - Persistent blocklist across restarts
   - IP whitelisting support
   - Automatic cleanup of expired blocks
+
+- **Web Dashboard**
+  - Real-time attack visualization
+  - Live log streaming
+  - Traffic pattern analysis
+  - Resource usage monitoring
+  - Blocked IPs management
+  - Interactive charts and graphs
+  - Color-coded severity levels
+  - Mobile-responsive interface
 
 ## Requirements
 
@@ -127,6 +137,14 @@ enable_connection_tracking: true
 enable_resource_monitoring: true
 ```
 
+### Web Dashboard Configuration
+```yaml
+web_dashboard:
+  enabled: true
+  host: "localhost"  # Change to 0.0.0.0 to allow external access
+  port: 5000        # Web interface port
+```
+
 ## Usage
 
 ### Running as a Service
@@ -174,6 +192,51 @@ Example stats response:
   }
 }
 ```
+
+### Web Dashboard
+
+The system includes a real-time web dashboard that provides:
+
+1. **Live Monitoring**
+   - Real-time log streaming with color-coded severity levels
+   - Attack statistics with pie charts
+   - Traffic pattern visualization
+   - Resource usage graphs (CPU, Memory)
+   - Active connections tracking
+
+2. **Attack Analysis**
+   - Attack type distribution
+   - Historical attack patterns
+   - Traffic anomaly detection
+   - Source IP analytics
+
+3. **Resource Management**
+   - Blocked IPs table with pagination and search
+   - System resource monitoring
+   - Performance metrics tracking
+   - Health status indicators
+
+Access the dashboard by opening your web browser and navigating to:
+```
+http://localhost:5000
+```
+
+The dashboard automatically updates:
+- Logs: Every 1 second
+- Statistics and charts: Every 5 seconds
+- Resource usage: Every 30 seconds
+
+### Security Notes for Web Dashboard
+
+1. **Access Control**
+   - By default, dashboard access is restricted to localhost
+   - Change host to "0.0.0.0" to allow external access (not recommended without additional security)
+   - Consider setting up a reverse proxy with authentication for remote access
+
+2. **Data Security**
+   - Sensitive configuration data is only available on localhost
+   - Statistics and metrics are read-only
+   - All connections are monitored and rate-limited
 
 ## Monitoring
 

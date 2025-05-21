@@ -26,6 +26,7 @@ from typing import Dict, Deque, Tuple, Optional
 import numpy as np
 from dataclasses import dataclass
 from functools import wraps
+from web_dashboard import run_dashboard, WebLogHandler, update_stats
 
 # Optional imports with graceful fallback
 try:
@@ -108,7 +109,14 @@ DEFAULT_CONFIG = {
     "enable_request_distribution": True,
     
     # Chain name
-    "iptables_chain_name": "FLOOD_BLOCK"
+    "iptables_chain_name": "FLOOD_BLOCK",
+    
+    # Web dashboard settings
+    "web_dashboard": {
+        "enabled": True,
+        "host": "localhost",
+        "port": 5000
+    }
 }
 
 @dataclass
@@ -346,40 +354,34 @@ def process_packet(pkt):
     pkt.accept()
 
 def monitor_loop():
-    """Enhanced monitoring loop with all detection features"""
+    """Enhanced monitoring loop with dashboard updates"""
     while True:
         time.sleep(config["monitor_interval"])
         current_time = time.time()
         
         with resource_lock:
+            traffic_data = {}
             for ip, counts in packet_counts.items():
-                # Check ICMP flood
+                # Update traffic patterns for dashboard
+                for protocol, count in counts.items():
+                    traffic_data[protocol] = traffic_data.get(protocol, 0) + count
+                
+                # Check thresholds
                 if counts['ICMP'] > config["icmp_threshold"]:
                     block_ip(ip, "ICMP Flood", f"{counts['ICMP']} packets/sec")
                 
-                # Check SYN flood
                 if counts['SYN'] > config["syn_threshold"]:
                     block_ip(ip, "SYN Flood", f"{counts['SYN']} packets/sec")
                 
-                # Check UDP flood
                 if counts['UDP'] > config["udp_threshold"]:
                     block_ip(ip, "UDP Flood", f"{counts['UDP']} packets/sec")
-                
-                # Resource monitoring
-                if config["enable_resource_monitoring"]:
-                    for resource_type in ["memory", "cpu", "connections"]:
-                        is_suspicious, detail = resource_monitor.add_measurement(
-                            resource_type, 
-                            sum(counts.values()), 
-                            current_time
-                        )
-                        if is_suspicious:
-                            logger.warning(f"Resource alert for {ip}: {detail}")
             
-            packet_counts.clear()
+            # Update dashboard with traffic patterns
+            if config["web_dashboard"]["enabled"]:
+                update_stats(traffic_data=traffic_data)
 
 def block_ip(ip: str, attack_type: str = "unknown", detail: str = ""):
-    """Enhanced IP blocking with alerts"""
+    """Enhanced IP blocking with alerts and dashboard updates"""
     if not validate_ip_address(ip):
         logger.warning(f"Invalid IP address, not blocking: {ip}")
         return False
@@ -396,6 +398,10 @@ def block_ip(ip: str, attack_type: str = "unknown", detail: str = ""):
             blocked_ips_set.add(ip)
             STATS["blocked_ips"][ip] += 1
             STATS["attacks_detected"][attack_type] += 1
+            
+            # Update dashboard stats
+            if config["web_dashboard"]["enabled"]:
+                update_stats(attack_type=attack_type, blocked_ip=ip)
             
             logger.info(f"Blocked {ip} - {attack_type}: {detail}")
             
@@ -650,10 +656,9 @@ def print_banner():
     """
     print(banner)
 
-# Update main() function with new features
 def main():
-    """Enhanced main function with all features enabled"""
-    global config
+    """Enhanced main function with web dashboard"""
+    global config, adaptive_detector, connection_tracker, resource_monitor
     
     # Parse arguments and load config
     args = parse_arguments()
@@ -661,6 +666,12 @@ def main():
     
     # Setup logging
     setup_logging()
+    
+    # Add web dashboard logging handler if enabled
+    if config["web_dashboard"]["enabled"]:
+        web_handler = WebLogHandler()
+        web_handler.setLevel(logging.INFO)
+        logger.addHandler(web_handler)
     
     # Print banner
     print_banner()
@@ -682,7 +693,6 @@ def main():
     
     # Setup components
     setup_iptables()
-    start_health_check_server()
     
     # Start monitoring threads
     monitor_thread = threading.Thread(target=monitor_loop, daemon=True)
@@ -691,6 +701,16 @@ def main():
     if config["enable_resource_monitoring"]:
         resource_thread = threading.Thread(target=monitor_resource_usage, daemon=True)
         resource_thread.start()
+    
+    # Start web dashboard if enabled
+    if config["web_dashboard"]["enabled"]:
+        dashboard_thread = threading.Thread(
+            target=run_dashboard,
+            args=(config["web_dashboard"]["host"], config["web_dashboard"]["port"]),
+            daemon=True
+        )
+        dashboard_thread.start()
+        logger.info(f"Web dashboard running at http://{config['web_dashboard']['host']}:{config['web_dashboard']['port']}")
     
     logger.info(f"Enhanced DDoS Protection v{VERSION} initialized and running")
     

@@ -57,3 +57,9 @@ iptables_chain_name: "FLOOD_BLOCK"
 whitelisted_ips:
   - "192.168.1.1"
   # Add more IPs as needed
+
+# Web Dashboard settings
+web_dashboard:
+  enabled: true
+  host: "localhost"  # Change to 0.0.0.0 to allow external access
+  port: 5000        # Web interface port
