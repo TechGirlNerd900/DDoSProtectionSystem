@@ -1,0 +1,59 @@
+# Enhanced DDoS Protection System Configuration
+# Copy this file to config.yaml and modify as needed
+
+# Log settings
+log_file: "./ddos_protection.log"
+log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+log_max_size: 10485760  # 10MB
+log_backup_count: 5
+
+# Resource limits
+max_memory_mb: 512
+max_cpu_percent: 80
+max_tracked_ips: 10000
+cleanup_interval: 3600  # 1 hour
+
+# Attack thresholds
+icmp_threshold: 20
+syn_threshold: 30
+udp_threshold: 40
+http_get_threshold: 100
+adaptive_factor: 1.5
+
+# Monitoring settings
+monitor_interval: 1
+block_time: 60
+alert_interval: 600
+
+# Email alert settings
+smtp_server: "smtp.gmail.com"
+smtp_port: 587
+smtp_user: "your-email@gmail.com"
+smtp_password: "your-app-specific-password"
+alert_email: "admin@example.com"
+enable_email_alerts: true
+
+# Telegram alert settings
+enable_telegram: false
+telegram_bot_token: ""
+telegram_chat_id: ""
+
+# Advanced features
+enable_adaptive_thresholds: true
+enable_connection_tracking: true
+enable_resource_monitoring: true
+enable_request_distribution: true
+
+# Health check settings
+enable_health_check: true
+health_check_port: 8080
+health_check_allowed_ips:
+  - "127.0.0.1"
+
+# Chain name for iptables
+iptables_chain_name: "FLOOD_BLOCK"
+
+# Whitelisted IPs (will never be blocked)
+whitelisted_ips:
+  - "192.168.1.1"
+  # Add more IPs as needed

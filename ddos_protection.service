@@ -1,0 +1,15 @@
+[Unit]
+Description=Enhanced DDoS Protection System
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/python3 /usr/local/bin/flood_detector.py
+Restart=always
+RestartSec=30
+StandardOutput=append:/var/log/ddos_protection.log
+StandardError=append:/var/log/ddos_protection.error.log
+
+[Install]
+WantedBy=multi-user.target
